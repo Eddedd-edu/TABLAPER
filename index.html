@@ -92,12 +92,22 @@
         }
         .element-card.found { opacity: 1; background: rgba(115, 218, 202, 0.2); border-color: var(--correct); }
         
-        /* --- ADMIN --- */
+        /* Animación Destello */
+        @keyframes pulseHit {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(115, 218, 202, 0.7); background-color: var(--correct); color: #1a1b26;}
+            50% { transform: scale(1.1); box-shadow: 0 0 15px 5px rgba(115, 218, 202, 0.5); background-color: var(--correct); color: #1a1b26;}
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(115, 218, 202, 0); }
+        }
+        .anim-hit { animation: pulseHit 0.6s ease-out; }
+
+        /* --- ADMIN Y UTILIDADES --- */
         .admin-table-wrapper { overflow-x: auto; margin-top: 20px; }
         .admin-table { width: 100%; min-width: 600px; }
         .admin-table th { background: var(--accent); color: #1a1b26; }
         .admin-table td { background: #14151f; }
         .import-box { margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border: 2px dashed var(--warning); border-radius: 8px; text-align: left; }
+
+        .timer-display { color: var(--warning); font-size: 1.2rem; font-family: monospace; }
 
         @media (max-width: 768px) {
             h1 { font-size: 1.5rem; }
@@ -208,15 +218,16 @@
         <section id="evaluacion" class="section">
             <h2>Evaluación de Conocimientos</h2>
             <div class="game-container" id="login-eval">
-                <p style="color:var(--secondary)">Ingresa tu Código ZipGrade para iniciar la prueba. <br><small>(Solo tienes un intento)</small></p>
+                <p style="color:var(--secondary)">Ingresa tu Código ZipGrade para iniciar la prueba. <br><small>(Solo tienes un intento. Tiempo límite: 10 minutos)</small></p>
                 <input type="number" id="zip-eval" placeholder="Ej: 101012026">
                 <button class="action-btn" onclick="validarIngreso('evaluacion')" id="btn-login-eval">Verificar e Iniciar</button>
                 <div id="error-eval" style="color:var(--error); margin-top:10px; font-weight:bold;"></div>
             </div>
 
             <div class="game-container" id="content-eval" style="display:none;">
-                <div style="background:var(--btn-bg); padding:10px; border-radius:8px; margin-bottom:15px; font-weight:bold;">
-                    Estudiante: <span id="nombre-estudiante-eval" style="color:var(--correct)"></span>
+                <div style="display:flex; justify-content:space-between; align-items:center; background:var(--btn-bg); padding:10px; border-radius:8px; margin-bottom:15px; font-weight:bold;">
+                    <span>Estudiante: <span id="nombre-estudiante-eval" style="color:var(--correct)"></span></span>
+                    <span id="timer-eval" class="timer-display">10:00</span>
                 </div>
                 <div id="contenedor-preguntas"></div>
                 <button class="action-btn" id="btn-enviar-eval" onclick="calificarEvaluacion()">Enviar Respuestas</button>
@@ -227,19 +238,20 @@
         <section id="juego" class="section">
             <h2>Batalla Elemental</h2>
             <div class="game-container" id="login-juego">
-                <p style="color:var(--secondary)">Ingresa tu Código ZipGrade para registrar tu puntaje.</p>
+                <p style="color:var(--secondary)">Ingresa tu Código ZipGrade para registrar tu puntaje.<br><small>(Misión: 5 objetivos. Límite: 20 disparos y 10 minutos)</small></p>
                 <input type="number" id="zip-juego" placeholder="Ej: 101012026">
                 <button class="action-btn" onclick="validarIngreso('juego')" id="btn-login-juego">Verificar e Iniciar</button>
                 <div id="error-juego" style="color:var(--error); margin-top:10px; font-weight:bold;"></div>
             </div>
 
             <div class="game-container" id="content-juego" style="display:none;">
-                <div style="background:var(--btn-bg); padding:10px; border-radius:8px; margin-bottom:15px; font-weight:bold;">
-                    Cadete: <span id="nombre-estudiante-juego" style="color:var(--correct)"></span>
+                <div style="display:flex; justify-content:space-between; align-items:center; background:var(--btn-bg); padding:10px; border-radius:8px; margin-bottom:15px; font-weight:bold;">
+                    <span>Cadete: <span id="nombre-estudiante-juego" style="color:var(--correct)"></span></span>
+                    <span id="timer-juego" class="timer-display">10:00</span>
                 </div>
                 <div class="game-status">
                     <span>Hallados: <span id="contador" style="color:var(--correct)">0</span> / 5</span>
-                    <span>Disparos: <span id="intentos" style="color:var(--accent)">0</span></span>
+                    <span>Disparos: <span id="intentos" style="color:var(--accent)">0</span> / 20</span>
                     <span>Fallos: <span id="fallos" style="color:var(--error)">0</span></span>
                 </div>
 
@@ -251,11 +263,13 @@
                     <div class="element-card" id="card-4">Elemento 5<br><em>Cargando...</em></div>
                 </div>
 
-                <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
-                    <input type="number" id="inputGrupo" placeholder="Grupo (1-18)" min="1" max="18" style="width:140px;">
-                    <input type="number" id="inputPeriodo" placeholder="Periodo (1-7)" min="1" max="7" style="width:140px;">
+                <div id="controles-juego">
+                    <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+                        <input type="number" id="inputGrupo" placeholder="Grupo (1-18)" min="1" max="18" style="width:140px;">
+                        <input type="number" id="inputPeriodo" placeholder="Periodo (1-7)" min="1" max="7" style="width:140px;">
+                    </div>
+                    <button class="action-btn" id="btn-disparar" onclick="disparar()">Disparar Coordenadas</button>
                 </div>
-                <button class="action-btn" id="btn-disparar" onclick="disparar()">Disparar Coordenadas</button>
 
                 <div id="resultadoJuego" class="resultado"></div>
             </div>
@@ -313,6 +327,11 @@
         // --- ESTADO GLOBAL ---
         let currentStudent = { zip: null, nombre: null };
         let datosAdmin = [];
+        
+        // Variables de Tiempo
+        let tiempoEval = 600; let intervaloEval;
+        let tiempoJuego = 600; let intervaloJuego;
+        const TIROS_MAXIMOS = 20;
 
         // --- NAVEGACIÓN ---
         window.showSection = (id, btn) => {
@@ -322,15 +341,12 @@
             if(btn) btn.classList.add('active-nav');
         };
 
-        // --- NUEVA VALIDACIÓN DIRECTO CON FIREBASE ---
+        // --- INGRESO Y VALIDACIÓN ---
         window.validarIngreso = async (modulo) => {
-            const inputId = modulo === 'evaluacion' ? 'zip-eval' : 'zip-juego';
-            const errorId = modulo === 'evaluacion' ? 'error-eval' : 'error-juego';
-            const btnId = modulo === 'evaluacion' ? 'btn-login-eval' : 'btn-login-juego';
-            
-            const zip = document.getElementById(inputId).value.trim();
-            const errorDiv = document.getElementById(errorId);
-            const btn = document.getElementById(btnId);
+            const sufijo = modulo === 'evaluacion' ? 'eval' : 'juego';
+            const zip = document.getElementById(`zip-${sufijo}`).value.trim();
+            const errorDiv = document.getElementById(`error-${sufijo}`);
+            const btn = document.getElementById(`btn-login-${sufijo}`);
 
             errorDiv.innerText = "";
             if(!zip) { errorDiv.innerText = "Ingresa un código."; return; }
@@ -360,12 +376,12 @@
 
                 // Dar acceso
                 currentStudent = { zip: zip, nombre: nombre };
-                document.getElementById(`login-${modulo}`).style.display = "none";
-                document.getElementById(`content-${modulo}`).style.display = "block";
-                document.getElementById(`nombre-estudiante-${modulo}`).innerText = nombre;
+                document.getElementById(`login-${sufijo}`).style.display = "none";
+                document.getElementById(`content-${sufijo}`).style.display = "block";
+                document.getElementById(`nombre-estudiante-${sufijo}`).innerText = nombre;
                 
-                if(modulo === 'evaluacion') generarEvaluacion();
-                if(modulo === 'juego') iniciarJuego();
+                if(modulo === 'evaluacion') { generarEvaluacion(); iniciarTimerEval(); }
+                if(modulo === 'juego') { iniciarJuego(); iniciarTimerJuego(); }
 
             } catch (e) {
                 errorDiv.innerText = "Error de conexión con el servidor de Firebase.";
@@ -373,6 +389,39 @@
                 btn.disabled = false; btn.innerText = "Verificar e Iniciar";
             }
         };
+
+        // --- RELOJES ---
+        function formatearTiempo(segundos) {
+            let m = Math.floor(segundos / 60);
+            let s = segundos % 60;
+            return `${m}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function iniciarTimerEval() {
+            tiempoEval = 600; // 10 min
+            document.getElementById('timer-eval').innerText = formatearTiempo(tiempoEval);
+            intervaloEval = setInterval(() => {
+                tiempoEval--;
+                document.getElementById('timer-eval').innerText = formatearTiempo(tiempoEval);
+                if (tiempoEval <= 0) {
+                    clearInterval(intervaloEval);
+                    calificarEvaluacion(true); // Enviar forzado por tiempo
+                }
+            }, 1000);
+        }
+
+        function iniciarTimerJuego() {
+            tiempoJuego = 600; // 10 min
+            document.getElementById('timer-juego').innerText = formatearTiempo(tiempoJuego);
+            intervaloJuego = setInterval(() => {
+                tiempoJuego--;
+                document.getElementById('timer-juego').innerText = formatearTiempo(tiempoJuego);
+                if (tiempoJuego <= 0) {
+                    clearInterval(intervaloJuego);
+                    guardarRécordBatalla("Tiempo agotado.");
+                }
+            }, 1000);
+        }
 
         // ==========================================
         //  EVALUACIÓN (20 Preguntas)
@@ -416,7 +465,7 @@
             document.getElementById('contenedor-preguntas').innerHTML = html;
         }
 
-        window.calificarEvaluacion = async () => {
+        window.calificarEvaluacion = async (forzado = false) => {
             let puntaje = 0; let respondidas = 0;
             for(let i = 0; i < 5; i++) {
                 let opciones = document.getElementsByName('preg' + i);
@@ -432,12 +481,14 @@
             const resDiv = document.getElementById('resultado-evaluacion');
             resDiv.style.display = "block";
 
-            if (respondidas < 5) {
+            // Si el estudiante presiona el botón, exigir que responda todas
+            if (!forzado && respondidas < 5) {
                 resDiv.className = "resultado miss";
                 resDiv.innerHTML = "Por favor, responde todas las preguntas.";
                 return;
             }
 
+            clearInterval(intervaloEval); // Detenemos el reloj
             document.getElementById('btn-enviar-eval').disabled = true;
             document.getElementById('btn-enviar-eval').innerText = "Guardando...";
             resDiv.className = "resultado"; resDiv.innerHTML = "Registrando nota en el servidor...";
@@ -446,7 +497,7 @@
                 await setDoc(doc(db, "evaluaciones_enlace", currentStudent.zip), {
                     nombre: currentStudent.nombre,
                     zipgrade: currentStudent.zip,
-                    puntaje: puntaje,
+                    puntaje: puntaje, // Escala 0 a 5 natural al ser 5 preguntas
                     fecha: new Date().toLocaleString("es-CO")
                 });
 
@@ -510,7 +561,8 @@
         }
 
         window.disparar = async () => {
-            if (hallados === 5) return;
+            if (hallados === 5 || tiros >= TIROS_MAXIMOS) return;
+            
             const g = parseInt(document.getElementById('inputGrupo').value);
             const p = parseInt(document.getElementById('inputPeriodo').value);
             const res = document.getElementById('resultadoJuego');
@@ -530,37 +582,51 @@
                 } else {
                     obj.descubierto = true; hallados++;
                     let card = document.getElementById(`card-${hitIndex}`);
-                    card.classList.add("found");
+                    
+                    // Aplicar animación de destello
+                    card.classList.add("found", "anim-hit");
                     card.innerHTML = `<strong style="color:var(--correct); font-size:1.1rem;">${obj.nombre}</strong><br>G:${g} P:${p}`;
                     res.className = "resultado hit"; res.innerHTML = `¡IMPACTO DIRECTO! <strong>${obj.nombre}</strong> destruido.`;
+                    
+                    // Limpiar la clase de animación para no ensuciar el DOM
+                    setTimeout(() => card.classList.remove("anim-hit"), 600);
                 }
             } else {
-                malas++; res.className = "resultado miss"; res.innerHTML = `Agua. (G${g}, P${p}) está vacío.`;
+                malas++; res.className = "resultado miss"; res.innerHTML = `Agua. Coordenada (G${g}, P${p}) fallida.`;
             }
 
             actualizarHUD();
 
             if (hallados === 5) {
-                document.getElementById('btn-disparar').disabled = true;
-                document.getElementById('btn-disparar').innerText = "Guardando...";
-                res.className = "resultado"; res.innerHTML = "Batalla terminada. Guardando récord en la base de datos...";
-                
-                try {
-                    await setDoc(doc(db, "batalla_enlace", currentStudent.zip), {
-                        nombre: currentStudent.nombre,
-                        zipgrade: currentStudent.zip,
-                        tiros: tiros,
-                        fallos: malas,
-                        fecha: new Date().toLocaleString("es-CO")
-                    });
-                    res.className = "resultado hit";
-                    res.innerHTML = `¡Misión Cumplida!<br>Puntaje guardado. Fallos totales: <strong>${malas}</strong>`;
-                    document.getElementById('btn-disparar').style.display = "none";
-                } catch(e) {
-                    res.className = "resultado miss"; res.innerHTML = "Error al guardar tu récord. Avisa al profesor.";
-                }
+                guardarRécordBatalla("¡Misión Cumplida! Todos los elementos hallados.");
+            } else if (tiros >= TIROS_MAXIMOS) {
+                guardarRécordBatalla("Munición agotada (20/20 disparos). Misión finalizada.");
             }
         };
+
+        async function guardarRécordBatalla(mensaje) {
+            clearInterval(intervaloJuego);
+            const res = document.getElementById('resultadoJuego');
+            document.getElementById('controles-juego').style.display = "none";
+            res.style.display = "block";
+            res.className = "resultado"; 
+            res.innerHTML = `${mensaje}<br>Guardando récord en la base de datos...`;
+            
+            try {
+                await setDoc(doc(db, "batalla_enlace", currentStudent.zip), {
+                    nombre: currentStudent.nombre,
+                    zipgrade: currentStudent.zip,
+                    tiros: tiros,
+                    fallos: malas,
+                    hallados: hallados,
+                    fecha: new Date().toLocaleString("es-CO")
+                });
+                res.className = hallados === 5 ? "resultado hit" : "resultado miss";
+                res.innerHTML = `${mensaje}<br>Puntaje guardado exitosamente. Fallos totales: <strong>${malas}</strong>`;
+            } catch(e) {
+                res.className = "resultado miss"; res.innerHTML = "Error al guardar tu récord. Avisa al profesor.";
+            }
+        }
 
         // ==========================================
         //  PANEL DE ADMINISTRADOR E IMPORTACIÓN
