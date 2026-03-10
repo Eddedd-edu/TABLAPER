@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QuímicaQuest: Teoría y Evaluación</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-color: #1a1b26; --panel-bg: rgba(36, 40, 59, 0.7); --text-color: #c0caf5;
+            --accent: #7aa2f7; --secondary: #e0af68; --correct: #73daca; --error: #f7768e;
+            --btn-bg: #414868; --highlight: rgba(122, 162, 247, 0.15);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color); color: var(--text-color);
+            margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center;
+        }
+
+        /* --- UI GLASSMORPHISM --- */
+        header { text-align: center; width: 100%; max-width: 1000px; margin-bottom: 15px; }
+        h1 { margin: 0 0 5px 0; color: var(--accent); font-size: 1.8rem; }
+        #subtitle { margin: 0 0 15px 0; font-size: 1rem; opacity: 0.8; }
+        
+        nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; width: 100%; max-width: 1000px; margin-bottom: 15px; }
+        nav button {
+            background: var(--btn-bg); color: var(--text-color); border: 1px solid rgba(255,255,255,0.1); 
+            padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem;
+            flex: 1 1 auto; transition: 0.2s;
+        }
+        nav button.active-nav { background: var(--accent); color: #1a1b26; }
+        nav button.btn-eval { background: var(--error); color: #1a1b26; }
+        nav button.btn-game { background: var(--secondary); color: #1a1b26; }
+        nav button.btn-admin { background: #bb9af7; color: #1a1b26; }
+
+        main { width: 100%; max-width: 1000px; }
+
+        .section {
+            display: none; background: var(--panel-bg); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            border-radius: 12px; padding: 20px; animation: fadeIn 0.4s; margin-bottom: 20px;
+        }
+        .section.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- TIPOGRAFÍA Y TABLAS --- */
+        h2 { color: var(--accent); border-bottom: 2px solid var(--btn-bg); padding-bottom: 8px; margin-top: 0; }
+        h3 { color: var(--correct); margin-top: 1.5rem; }
+        p, li { line-height: 1.6; font-size: 1.05rem; }
+        
+        .highlight-box { background: var(--highlight); border-left: 4px solid var(--accent); padding: 15px; margin: 15px 0; border-radius: 0 8px 8px 0; }
+        
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 0.95rem; }
+        th, td { border: 1px solid var(--btn-bg); padding: 10px; text-align: left; }
+        th { background-color: var(--btn-bg); color: var(--accent); }
+
+        /* --- ESTILOS DE EVALUACIÓN Y JUEGO --- */
+        .game-container { text-align: center; }
+        .pregunta-evaluacion { text-align: left; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--btn-bg); }
+        .pregunta-evaluacion:last-child { border-bottom: none; }
+        .pregunta-evaluacion p { font-weight: bold; color: var(--secondary); font-size: 1.1rem;}
+        .pregunta-evaluacion label { display: block; margin-bottom: 8px; cursor: pointer; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; transition: 0.2s; }
+        .pregunta-evaluacion label:hover { background: rgba(122, 162, 247, 0.2); }
+        
+        input[type="text"], input[type="number"], input[type="password"] {
+            padding: 12px; margin: 8px; font-size: 1rem; border-radius: 8px;
+            border: 1px solid var(--btn-bg); background: #14151f; color: white; width: calc(100% - 16px); max-width: 300px;
+        }
+
+        .action-btn {
+            background-color: var(--correct); color: #1a1b26; border: none; padding: 12px 20px;
+            border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1.1rem; width: 100%; max-width: 300px; transition: 0.2s; margin-top: 10px;
+        }
+        .action-btn:disabled { background: var(--btn-bg); color: #a9b1d6; cursor: not-allowed; }
+
+        .resultado { margin-top: 20px; font-size: 1.1rem; font-weight: bold; padding: 15px; border-radius: 8px; display: none;}
+        .hit { color: #1a1b26; background: var(--correct); }
+        .miss { color: #1a1b26; background: var(--error); }
+
+        /* --- BATALLA ELEMENTAL --- */
+        .game-status { display: flex; justify-content: space-around; flex-wrap: wrap; margin-bottom: 15px; font-size: 1.1rem; font-weight: bold; background: #14151f; padding: 10px; border-radius: 8px;}
+        #panelElementos { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px; }
+        .element-card {
+            background: #14151f; border: 2px solid var(--btn-bg); border-radius: 8px;
+            padding: 10px; text-align: center; opacity: 0.6; transition: 0.3s; font-size: 0.9rem;
+        }
+        .element-card.found { opacity: 1; background: rgba(115, 218, 202, 0.2); border-color: var(--correct); }
+        
+        /* --- ADMIN --- */
+        .admin-table-wrapper { overflow-x: auto; margin-top: 20px; }
+        .admin-table { width: 100%; min-width: 600px; }
+        .admin-table th { background: var(--accent); color: #1a1b26; }
+        .admin-table td { background: #14151f; }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 1.5rem; }
+            .action-btn, input { width: 100%; max-width: 100%; }
+            #panelElementos { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>QuímicaQuest SJ</h1>
+        <p id="subtitle">Teoría, Estructura Atómica y Enlaces</p>
+    </header>
+
+    <nav id="nav-menu">
+        <button onclick="showSection('historia', this)" class="active-nav">Historia</button>
+        <button onclick="showSection('clasificacion', this)">Clasificación</button>
+        <button onclick="showSection('propiedades', this)">Propiedades</button>
+        <button onclick="showSection('enlaces', this)">Enlaces</button>
+        <button onclick="showSection('evaluacion', this)" class="btn-eval"><i class="fas fa-file-alt"></i> Examen</button>
+        <button onclick="showSection('juego', this)" class="btn-game"><i class="fas fa-crosshairs"></i> Batalla</button>
+        <button onclick="showSection('admin', this)" class="btn-admin"><i class="fas fa-lock"></i> Admin</button>
+    </nav>
+
+    <main>
+        <section id="historia" class="section active">
+            <h2>Historia de la Teoría Atómica</h2>
+            <p>La química es el estudio de la composición, estructura, propiedades y reacciones de la materia. La teoría atómica se basa en la suposición de que la materia no es continua, sino que está formada por partículas llamadas átomos.</p>
+            <div class="highlight-box">
+                <strong>Hitos Científicos Clave:</strong>
+                <ul>
+                    <li><strong>Demócrito y Leucipo (460-370 a.C.):</strong> Postularon que la materia está constituida por partículas indivisibles llamadas átomos.</li>
+                    <li><strong>Robert Boyle (1660):</strong> Postuló que los elementos están formados por cuerpos simples (átomos) que no están hechos de otros cuerpos.</li>
+                    <li><strong>Lavoisier (1785):</strong> Formuló la Ley de la conservación de la masa (la materia no se crea ni se destruye, solo se transforma).</li>
+                    <li><strong>Dalton:</strong> Formuló la primera teoría atómica científica moderna.</li>
+                </ul>
+            </div>
+            <p>Actualmente sabemos que la materia está constituida por 118 tipos de elementos (92 naturales) que forman todas las sustancias del mundo.</p>
+        </section>
+
+        <section id="clasificacion" class="section">
+            <h2>Clasificación en la Tabla Periódica</h2>
+            <p>Afortunadamente, la naturaleza cuenta con gran cantidad y variedad de elementos químicos, organizados magistralmente en la Tabla Periódica.</p>
+            
+            <h3>1. Clasificación por Propiedades Físicas</h3>
+            <ul>
+                <li><strong>Metales:</strong> Ubicados a la izquierda y centro de la tabla. Son excelentes conductores del calor y la electricidad, maleables y dúctiles. Constituyen la gran mayoría de los elementos.</li>
+                <li><strong>No Metales:</strong> Se ubican a la derecha de la línea quebrada. Tienen propiedades opuestas a los metales (malos conductores, opacos, frágiles).</li>
+                <li><strong>Metaloides:</strong> Se encuentran sobre la línea quebrada y comparten características intermedias, actuando a menudo como semiconductores.</li>
+            </ul>
+
+            <h3>2. Grupos o Familias Químicas</h3>
+            <p>Los elementos de una misma columna (Grupo) comparten el mismo número de electrones de valencia, por lo que tienen un comportamiento químico similar, formando "familias":</p>
+            <table>
+                <tr>
+                    <th>Grupo</th>
+                    <th>Nombre de la Familia</th>
+                    <th>Características Clave</th>
+                </tr>
+                <tr>
+                    <td>Grupo 1 (IA)</td>
+                    <td><strong>Metales Alcalinos</strong></td>
+                    <td>Muy reactivos (reaccionan violentamente con agua). 1 electrón de valencia. (Ej: Li, Na, K). *El Hidrógeno está aquí pero es no metal.</td>
+                </tr>
+                <tr>
+                    <td>Grupo 2 (IIA)</td>
+                    <td><strong>Metales Alcalinotérreos</strong></td>
+                    <td>Reactivos, más duros que los alcalinos. 2 electrones de valencia. (Ej: Be, Mg, Ca).</td>
+                </tr>
+                <tr>
+                    <td>Grupos 3-12 (B)</td>
+                    <td><strong>Metales de Transición</strong></td>
+                    <td>Metales duros, altos puntos de fusión, buenos conductores. (Ej: Fe, Cu, Au).</td>
+                </tr>
+                <tr>
+                    <td>Grupo 13 (IIIA)</td>
+                    <td><strong>Térreos o Boroideos</strong></td>
+                    <td>3 electrones de valencia. (Ej: Boro, Aluminio).</td>
+                </tr>
+                <tr>
+                    <td>Grupo 14 (IVA)</td>
+                    <td><strong>Carbonoideos</strong></td>
+                    <td>4 electrones de valencia. Vitales para la vida y la tecnología. (Ej: Carbono, Silicio).</td>
+                </tr>
+                <tr>
+                    <td>Grupo 15 (VA)</td>
+                    <td><strong>Nitrogenoideos</strong></td>
+                    <td>5 electrones de valencia. (Ej: Nitrógeno, Fósforo).</td>
+                </tr>
+                <tr>
+                    <td>Grupo 16 (VIA)</td>
+                    <td><strong>Anfígenos o Calcógenos</strong></td>
+                    <td>6 electrones de valencia. Formadores de minerales y óxidos. (Ej: Oxígeno, Azufre).</td>
+                </tr>
+                <tr>
+                    <td>Grupo 17 (VIIA)</td>
+                    <td><strong>Halógenos</strong></td>
+                    <td>No metales extremadamente reactivos. 7 electrones de valencia. (Ej: Flúor, Cloro).</td>
+                </tr>
+                <tr>
+                    <td>Grupo 18 (VIIIA)</td>
+                    <td><strong>Gases Nobles</strong></td>
+                    <td>Inertes o muy poco reactivos debido a su capa de valencia completa. (Ej: Helio, Neón).</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="propiedades" class="section">
+            <h2>Propiedades Periódicas</h2>
+            <p>El comportamiento químico de los átomos está dictado por tendencias observables según su posición en los grupos y periodos:</p>
+            
+            <table>
+                <tr>
+                    <th>Propiedad</th>
+                    <th>Definición y Tendencia</th>
+                </tr>
+                <tr>
+                    <td><strong>Radio Atómico / Volumen Atómico</strong></td>
+                    <td>Determina el tamaño del átomo. Aumenta al bajar en un grupo (más niveles de energía) y disminuye al avanzar de izquierda a derecha en un periodo.</td>
+                </tr>
+                <tr>
+                    <td><strong>Electronegatividad</strong></td>
+                    <td>Capacidad de un átomo para atraer electrones en un enlace químico. Aumenta hacia arriba y hacia la derecha (El Flúor es el más electronegativo).</td>
+                </tr>
+                <tr>
+                    <td><strong>Energía (Potencial) de Ionización</strong></td>
+                    <td>Energía requerida para arrancar un electrón de un átomo neutro. Los metales tienen baja energía de ionización, los no metales alta.</td>
+                </tr>
+                <tr>
+                    <td><strong>Afinidad Electrónica</strong></td>
+                    <td>Energía liberada cuando un átomo neutro acepta un electrón. Los halógenos tienen la mayor afinidad.</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="enlaces" class="section">
+            <h2>Enlaces Químicos, Estabilidad y Fórmulas</h2>
+            <div class="highlight-box">
+                <p>A través de las reacciones químicas, los átomos se unen mediante <strong>enlaces químicos</strong> para llegar a estados más estables, formando moléculas o redes cristalinas.</p>
+            </div>
+            
+            <h3>Búsqueda de la Estabilidad</h3>
+            <p>Para lograr la estabilidad energética (similar a la de los gases nobles), los átomos donan, aceptan o comparten electrones guiados por dos principios fundamentales:</p>
+            <ul>
+                <li><strong>La Regla del Octeto:</strong> La mayoría de los átomos buscan completar <strong>8 electrones</strong> en su último nivel de energía (capa de valencia) para ser estables. Por ejemplo, el Cloro (7 electrones) busca ganar 1 electrón.</li>
+                <li><strong>La Ley del Dueto:</strong> Elementos pequeños como el <strong>Hidrógeno (H)</strong>, el Litio (Li) o el Berilio (Be) no pueden albergar 8 electrones. Estos alcanzan su estabilidad completando solo <strong>2 electrones</strong> en su único o último nivel, adquiriendo la configuración estable del gas noble Helio (He).</li>
+            </ul>
+
+            <h3>Fórmulas Químicas</h3>
+            <p>Cuando los átomos se enlazan respetando las reglas del octeto y del dueto, forman sustancias compuestas. Las <strong>fórmulas químicas</strong> son la representación alfanumérica de estos compuestos, indicando qué elementos los forman y en qué proporción geométrica se encuentran.</p>
+            
+            <div class="highlight-box">
+                <strong>Tipos de Fórmulas Químicas:</strong>
+                <ul>
+                    <li><strong>Fórmula Empírica:</strong> Indica la proporción más simple en números enteros de los átomos presentes en un compuesto. Es la mínima expresión.<br>
+                    <em>Ejemplo:</em> El peróxido de hidrógeno (agua oxigenada) tiene igual número de hidrógenos y oxígenos (proporción 1:1), por lo que su fórmula empírica es <strong>HO</strong>.</li>
+                    <li><strong>Fórmula Molecular:</strong> Indica la cantidad exacta y real de átomos de cada elemento que forman una sola molécula del compuesto.<br>
+                    <em>Ejemplo:</em> La fórmula molecular del peróxido de hidrógeno es <strong>H<sub>2</sub>O<sub>2</sub></strong> (contiene exactamente 2 átomos de H y 2 de O). Para el agua, es <strong>H<sub>2</sub>O</strong>.</li>
+                    <li><strong>Fórmula Estructural:</strong> Muestra de forma gráfica cómo están conectados los átomos entre sí, utilizando líneas para representar los enlaces simples, dobles o triples.<br>
+                    <em>Ejemplo:</em> Para el agua es <strong>H — O — H</strong>, y para el dióxido de carbono es <strong>O = C = O</strong>.</li>
+                    <li><strong>Estructura de Lewis:</strong> Representa los electrones de valencia usando puntos o cruces alrededor del símbolo. Muestra tanto los electrones que se comparten como los pares libres que no forman enlace.<br>
+                    <em>Ejemplo:</em> Para el agua se representa como <strong>H : O : H</strong> (recordando añadir visualmente dos pares de electrones libres o no enlazantes encima y debajo del símbolo del oxígeno).</li>
+                </ul>
+            </div>
+            
+            <table>
+                <tr>
+                    <th>Fórmula Molecular</th>
+                    <th>Análisis de la Estructura</th>
+                </tr>
+                <tr>
+                    <td><strong>H<sub>2</sub>O</strong> (Agua)</td>
+                    <td>Contiene 2 átomos de Hidrógeno y 1 de Oxígeno. El Oxígeno cumple la regla del <strong>octeto</strong> compartiendo electrones con los hidrógenos, y cada Hidrógeno cumple la ley del <strong>dueto</strong>.</td>
+                </tr>
+                <tr>
+                    <td><strong>NaCl</strong> (Sal de mesa)</td>
+                    <td>1 átomo de Sodio (Na) y 1 de Cloro (Cl). El Sodio cede su único electrón de valencia al Cloro. El Cloro completa su <strong>octeto</strong>, y el Sodio se queda con su capa interior completa (también 8 electrones).</td>
+                </tr>
+                <tr>
+                    <td><strong>CO<sub>2</sub></strong> (Dióxido de carbono)</td>
+                    <td>1 átomo de Carbono (Grupo 14) forma enlaces dobles con 2 átomos de Oxígeno (Grupo 16), logrando que los tres elementos completen su <strong>octeto</strong>.</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="evaluacion" class="section">
+            <h2>Evaluación de Conocimientos</h2>
+            <div class="game-container" id="login-eval">
+                <p style="color:var(--secondary)">Ingresa tu Código ZipGrade para iniciar la prueba. <br><small>(Solo tienes un intento)</small></p>
+                <input type="text" id="zip-eval" placeholder="Ej: 12345">
+                <button class="action-btn" onclick="validarIngreso('evaluacion')" id="btn-login-eval">Verificar e Iniciar</button>
+                <div id="error-eval" style="color:var(--error); margin-top:10px; font-weight:bold;"></div>
+            </div>
+
+            <div class="game-container" id="content-eval" style="display:none;">
+                <div style="background:var(--btn-bg); padding:10px; border-radius:8px; margin-bottom:15px; font-weight:bold;">
+                    Estudiante: <span id="nombre-estudiante-eval" style="color:var(--correct)"></span>
+                </div>
+                <div id="contenedor-preguntas"></div>
+                <button class="action-btn" id="btn-enviar-eval" onclick="calificarEvaluacion()">Enviar Respuestas</button>
+                <div id="resultado-evaluacion" class="resultado"></div>
+            </div>
+        </section>
+
+        <section id="juego" class="section">
+            <h2>Batalla Elemental</h2>
+            <div class="game-container" id="login-juego">
+                <p style="color:var(--secondary)">Ingresa tu Código ZipGrade para registrar tu puntaje.</p>
+                <input type="text" id="zip-juego" placeholder="Ej: 12345">
+                <button class="action-btn" onclick="validarIngreso('juego')" id="btn-login-juego">Verificar e Iniciar</button>
+                <div id="error-juego" style="color:var(--error); margin-top:10px; font-weight:bold;"></div>
+            </div>
+
+            <div class="game-container" id="content-juego" style="display:none;">
+                <div style="background:var(--btn-bg); padding:10px; border-radius:8px; margin-bottom:15px; font-weight:bold;">
+                    Cadete: <span id="nombre-estudiante-juego" style="color:var(--correct)"></span>
+                </div>
+                <div class="game-status">
+                    <span>Hallados: <span id="contador" style="color:var(--correct)">0</span> / 5</span>
+                    <span>Disparos: <span id="intentos" style="color:var(--accent)">0</span></span>
+                    <span>Fallos: <span id="fallos" style="color:var(--error)">0</span></span>
+                </div>
+
+                <div id="panelElementos">
+                    <div class="element-card" id="card-0">Elemento 1<br><em>Cargando...</em></div>
+                    <div class="element-card" id="card-1">Elemento 2<br><em>Cargando...</em></div>
+                    <div class="element-card" id="card-2">Elemento 3<br><em>Cargando...</em></div>
+                    <div class="element-card" id="card-3">Elemento 4<br><em>Cargando...</em></div>
+                    <div class="element-card" id="card-4">Elemento 5<br><em>Cargando...</em></div>
+                </div>
+
+                <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
+                    <input type="number" id="inputGrupo" placeholder="Grupo (1-18)" min="1" max="18" style="width:140px;">
+                    <input type="number" id="inputPeriodo" placeholder="Periodo (1-7)" min="1" max="7" style="width:140px;">
+                </div>
+                <button class="action-btn" id="btn-disparar" onclick="disparar()">Disparar Coordenadas</button>
+
+                <div id="resultadoJuego" class="resultado"></div>
+            </div>
+        </section>
+
+        <section id="admin" class="section">
+            <h2>Panel de Control Docente</h2>
+            <div class="game-container" id="login-admin">
+                <p>Ingrese credenciales de administrador.</p>
+                <input type="password" id="admin-pass" placeholder="Contraseña">
+                <button class="action-btn" onclick="loginAdmin()">Ingresar</button>
+                <div id="error-admin" style="color:var(--error); margin-top:10px;"></div>
+            </div>
+
+            <div id="content-admin" style="display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                    <h3 style="margin:0;">Registros de Evaluación</h3>
+                    <button class="action-btn" style="width:auto; margin:0; padding:8px 15px; font-size:1rem;" onclick="descargarExcel()"><i class="fas fa-download"></i> Exportar a Excel</button>
+                </div>
+                <div class="admin-table-wrapper">
+                    <table class="admin-table" id="tabla-admin">
+                        <thead><tr><th>ZipGrade</th><th>Nombre Completo</th><th>Examen (Pts)</th><th>Batalla (Fallos)</th><th>Fecha</th></tr></thead>
+                        <tbody id="tbody-admin"><tr><td colspan="5" style="text-align:center;">Cargando datos...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+        // --- CONFIGURACIÓN FIREBASE ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCw4JnCCFHVogAEXncodxi9jnwigO7qUIA",
+            authDomain: "quimicaquest.firebaseapp.com",
+            projectId: "quimicaquest",
+            storageBucket: "quimicaquest.firebasestorage.app",
+            messagingSenderId: "796534851347",
+            appId: "1:796534851347:web:ae85716a8b612d889b3ce6"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- ESTADO GLOBAL ---
+        let baseEstudiantes = {}; // Diccionario: { "12345": "Juan Perez" }
+        let currentStudent = { zip: null, nombre: null };
+        let datosAdmin = [];
+
+        // --- NAVEGACIÓN ---
+        window.showSection = (id, btn) => {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            
+            document.querySelectorAll('#nav-menu button').forEach(b => b.classList.remove('active-nav'));
+            if(btn) btn.classList.add('active-nav');
+        };
+
+        // --- LECTURA EXCEL GITHUB ---
+        const excelUrl = "https://raw.githubusercontent.com/Eddedd-edu/ENTORNOVIRTUAL/main/students-6.xlsx";
+        
+        async function cargarExcel() {
+            try {
+                const response = await fetch(excelUrl);
+                const arrayBuffer = await response.arrayBuffer();
+                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                
+                // Asumiendo que la columna A (index 0) es Nombre y B (index 1) es ZipGrade, o viceversa.
+                // Ajusta los índices si tu Excel es diferente. Buscamos números.
+                data.forEach(row => {
+                    let nom = row[0]; let zip = row[1];
+                    if(typeof nom === 'number') { zip = nom; nom = row[1]; }
+                    if(zip && nom && !isNaN(zip)) { baseEstudiantes[zip.toString().trim()] = nom.trim(); }
+                });
+                console.log("Base de estudiantes cargada:", Object.keys(baseEstudiantes).length);
+            } catch (error) {
+                console.error("Error cargando Excel de GitHub. Verifica la URL o los permisos.", error);
+            }
+        }
+        
+        cargarExcel(); // Se ejecuta al abrir la página
+
+        // --- VALIDACIÓN DE ACCESO (EVAL & JUEGO) ---
+        window.validarIngreso = async (modulo) => {
+            const inputId = modulo === 'evaluacion' ? 'zip-eval' : 'zip-juego';
+            const errorId = modulo === 'evaluacion' ? 'error-eval' : 'error-juego';
+            const btnId = modulo === 'evaluacion' ? 'btn-login-eval' : 'btn-login-juego';
+            
+            const zip = document.getElementById(inputId).value.trim();
+            const errorDiv = document.getElementById(errorId);
+            const btn = document.getElementById(btnId);
+
+            errorDiv.innerText = "";
+            if(!zip) { errorDiv.innerText = "Ingresa un código."; return; }
+            if(Object.keys(baseEstudiantes).length === 0) { errorDiv.innerText = "La base de datos aún está cargando. Intenta en 3 segundos."; return; }
+
+            const nombre = baseEstudiantes[zip];
+            if(!nombre) { errorDiv.innerText = "Código no encontrado en el sistema."; return; }
+
+            btn.disabled = true;
+            btn.innerText = "Verificando...";
+
+            try {
+                // Verificar si ya presentó
+                const docRef = doc(db, modulo === 'evaluacion' ? "evaluaciones_enlace" : "batalla_enlace", zip);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    errorDiv.innerText = `Acceso denegado. Ya registraste una nota en ${modulo === 'evaluacion' ? 'este examen' : 'esta batalla'}.`;
+                    btn.disabled = false; btn.innerText = "Verificar e Iniciar";
+                    return;
+                }
+
+                // Dar acceso
+                currentStudent = { zip: zip, nombre: nombre };
+                document.getElementById(`login-${modulo}`).style.display = "none";
+                document.getElementById(`content-${modulo}`).style.display = "block";
+                document.getElementById(`nombre-estudiante-${modulo}`).innerText = nombre;
+                
+                if(modulo === 'evaluacion') generarEvaluacion();
+                if(modulo === 'juego') iniciarJuego();
+
+            } catch (e) {
+                errorDiv.innerText = "Error de conexión con el servidor.";
+                btn.disabled = false; btn.innerText = "Verificar e Iniciar";
+            }
+        };
+
+        // ==========================================
+        //  EVALUACIÓN (20 Preguntas)
+        // ==========================================
+        const bancoPreguntas = [
+            { pregunta: "¿Quién postuló que toda la materia está constituida por partículas indivisibles llamadas átomos?", opciones: ["Aristóteles", "Robert Boyle", "Demócrito y Leucipo", "Lavoisier"], correcta: 2 },
+            { pregunta: "¿Qué científico formuló la Ley de la conservación de la masa?", opciones: ["Dalton", "Lavoisier", "Boyle", "Demócrito"], correcta: 1 },
+            { pregunta: "¿Qué porcentaje aproximado de los elementos químicos constituyen los metales?", opciones: ["50%", "75%", "90%", "20%"], correcta: 2 },
+            { pregunta: "¿Dónde se ubican los metales en la Tabla Periódica?", opciones: ["A la derecha de la línea quebrada", "Sobre la línea quebrada", "A la izquierda y centro", "Solo en la última columna"], correcta: 2 },
+            { pregunta: "¿Qué familia corresponde al Grupo 1 (IA)?", opciones: ["Gases Nobles", "Metales Alcalinos", "Halógenos", "Carbonoideos"], correcta: 1 },
+            { pregunta: "¿Cuántos electrones de valencia tienen los Metales Alcalinotérreos (Grupo 2)?", opciones: ["1", "2", "3", "8"], correcta: 1 },
+            { pregunta: "¿A qué grupo pertenecen los Halógenos?", opciones: ["Grupo 1 (IA)", "Grupo 18 (VIIIA)", "Grupo 17 (VIIA)", "Grupo 2 (IIA)"], correcta: 2 },
+            { pregunta: "¿Qué familia química se caracteriza por ser inerte o muy poco reactiva?", opciones: ["Metales de Transición", "Metales Alcalinos", "Gases Nobles", "Térreos"], correcta: 2 },
+            { pregunta: "¿Qué propiedad periódica determina el tamaño del átomo?", opciones: ["Electronegatividad", "Energía de Ionización", "Afinidad Electrónica", "Radio Atómico"], correcta: 3 },
+            { pregunta: "¿Cómo varía la electronegatividad en la Tabla Periódica?", opciones: ["Aumenta hacia arriba y hacia la derecha", "Aumenta hacia abajo y hacia la izquierda", "Disminuye hacia arriba", "No tiene un patrón definido"], correcta: 0 },
+            { pregunta: "¿Qué es la Energía de Ionización?", opciones: ["Energía liberada al aceptar un electrón", "Capacidad para atraer electrones", "Energía requerida para arrancar un electrón", "Tamaño del átomo neutro"], correcta: 2 },
+            { pregunta: "¿Qué busca cumplir la Regla del Octeto?", opciones: ["Completar 2 electrones en su último nivel", "Completar 8 electrones en su capa de valencia", "Perder todos sus electrones", "Formar solo enlaces dobles"], correcta: 1 },
+            { pregunta: "¿Qué elemento es un ejemplo clásico de buscar estabilidad mediante la Ley del Dueto?", opciones: ["Oxígeno", "Carbono", "Cloro", "Hidrógeno"], correcta: 3 },
+            { pregunta: "¿Qué tipo de fórmula indica la proporción más simple en números enteros de los átomos?", opciones: ["Molecular", "Estructural", "Empírica", "De Lewis"], correcta: 2 },
+            { pregunta: "¿Qué información nos da la Fórmula Molecular?", opciones: ["La proporción mínima", "La cantidad exacta y real de átomos en la molécula", "Cómo están conectados los átomos", "Los electrones de valencia como puntos"], correcta: 1 },
+            { pregunta: "¿Qué representa la Estructura de Lewis?", opciones: ["Los protones del núcleo", "El radio atómico", "Los electrones de valencia mediante puntos o cruces", "Solo los enlaces triples"], correcta: 2 },
+            { pregunta: "En el H2O, ¿qué regla(s) de estabilidad se cumplen?", opciones: ["Solo octeto", "Solo dueto", "El oxígeno cumple el octeto y el hidrógeno el dueto", "Ninguna"], correcta: 2 },
+            { pregunta: "¿Qué postulado estableció Robert Boyle en 1660?", opciones: ["La materia está hecha de 4 elementos", "Los elementos están formados por cuerpos simples", "Los electrones giran en órbitas", "El átomo tiene un núcleo positivo"], correcta: 1 },
+            { pregunta: "¿Qué elementos comparten características intermedias entre metales y no metales?", opciones: ["Gases Nobles", "Lantánidos", "Metaloides", "Actínidos"], correcta: 2 },
+            { pregunta: "¿Qué nos indica que varios elementos pertenezcan a la misma familia o grupo?", opciones: ["Tienen el mismo número atómico", "Tienen el mismo número de electrones de valencia y comportamiento", "Tienen la misma masa atómica", "Están en el mismo periodo"], correcta: 1 }
+        ];
+
+        let pregsElegidas = [];
+
+        function generarEvaluacion() {
+            let baraja = [...bancoPreguntas].sort(() => 0.5 - Math.random());
+            pregsElegidas = baraja.slice(0, 5);
+            let html = "";
+            pregsElegidas.forEach((p, index) => {
+                html += `<div class="pregunta-evaluacion"><p>${index + 1}. ${p.pregunta}</p>`;
+                p.opciones.forEach((opc, i) => {
+                    html += `<label><input type="radio" name="preg${index}" value="${i}"> ${opc}</label>`;
+                });
+                html += `</div>`;
+            });
+            document.getElementById('contenedor-preguntas').innerHTML = html;
+        }
+
+        window.calificarEvaluacion = async () => {
+            let puntaje = 0; let respondidas = 0;
+            for(let i = 0; i < 5; i++) {
+                let opciones = document.getElementsByName('preg' + i);
+                for(let j = 0; j < opciones.length; j++) {
+                    if(opciones[j].checked) {
+                        respondidas++;
+                        if(parseInt(opciones[j].value) === pregsElegidas[i].correcta) puntaje++;
+                        break;
+                    }
+                }
+            }
+
+            const resDiv = document.getElementById('resultado-evaluacion');
+            resDiv.style.display = "block";
+
+            if (respondidas < 5) {
+                resDiv.className = "resultado miss";
+                resDiv.innerHTML = "Por favor, responde todas las preguntas.";
+                return;
+            }
+
+            // Bloquear botón y guardar en Firebase
+            document.getElementById('btn-enviar-eval').disabled = true;
+            document.getElementById('btn-enviar-eval').innerText = "Guardando...";
+            resDiv.className = "resultado"; resDiv.innerHTML = "Registrando nota en el servidor...";
+
+            try {
+                await setDoc(doc(db, "evaluaciones_enlace", currentStudent.zip), {
+                    nombre: currentStudent.nombre,
+                    zipgrade: currentStudent.zip,
+                    puntaje: puntaje,
+                    fecha: new Date().toLocaleString("es-CO")
+                });
+
+                resDiv.className = "resultado hit";
+                resDiv.innerHTML = `Examen Guardado.<br>Tu puntaje final es: <strong>${puntaje} / 5</strong>`;
+                document.getElementById('contenedor-preguntas').style.display = "none";
+                document.getElementById('btn-enviar-eval').style.display = "none";
+
+            } catch(e) {
+                resDiv.className = "resultado miss";
+                resDiv.innerHTML = "Error al guardar. Informa a tu profesor.";
+                document.getElementById('btn-enviar-eval').disabled = false;
+                document.getElementById('btn-enviar-eval').innerText = "Reintentar";
+            }
+        };
+
+        // ==========================================
+        //  BATALLA ELEMENTAL
+        // ==========================================
+        const baseElementos = [
+            { nombre: "Hidrógeno (H)", grupo: 1, periodo: 1, pista: "A pesar de estar confinado en la torre de los metales más explosivos, soy un gas solitario que alcanza la nobleza con tan solo dos súbditos." },
+            { nombre: "Helio (He)", grupo: 18, periodo: 1, pista: "Soy el segundo en el universo, tan noble y ligero que escapo de la gravedad terrestre si me liberan, inflando tus celebraciones." },
+            { nombre: "Litio (Li)", grupo: 1, periodo: 2, pista: "Soy el metal más ligero, capaz de flotar en el aceite, y guardo la energía vital de tus dispositivos móviles." },
+            { nombre: "Berilio (Be)", grupo: 2, periodo: 2, pista: "Dulce al gusto pero tóxico al cuerpo; mis aleaciones no producen chispas, y mi transparencia a los rayos X me hace una ventana perfecta." },
+            { nombre: "Boro (B)", grupo: 13, periodo: 2, pista: "No soy un metal, pero fortalezco el vidrio para que resista el fuego de los laboratorios y endurezco los imanes más potentes." },
+            { nombre: "Carbono (C)", grupo: 14, periodo: 2, pista: "Tengo múltiples rostros: puedo manchar tus manos como la ceniza más oscura, o adornar tu corona como la gema más inquebrantable; soy el arquitecto de la vida." },
+            { nombre: "Nitrógeno (N)", grupo: 15, periodo: 2, pista: "Conformo la mayor parte del aire que respiras, pero en mi forma pura y líquida puedo congelar todo en segundos." },
+            { nombre: "Oxígeno (O)", grupo: 16, periodo: 2, pista: "Soy un ladrón insaciable, segundo en la jerarquía de los codiciosos. Te mantengo vivo en cada respiro, mientras lentamente oxido y devoro el mundo." },
+            { nombre: "Flúor (F)", grupo: 17, periodo: 2, pista: "Soy el elemento más reactivo y codicioso de todos; protejo el esmalte de tus dientes pero en estado puro soy un gas corrosivo e indomable." },
+            { nombre: "Neón (Ne)", grupo: 18, periodo: 2, pista: "Llevo el nombre de lo 'nuevo', pero mi configuración es tan antigua, perfecta y autosuficiente que me niego rotundamente a reaccionar, brillando en rojo cuando me excitan." },
+            { nombre: "Sodio (Na)", grupo: 1, periodo: 3, pista: "Muestro una docilidad engañosa al permitir que me cortes con un cuchillo, mas mi sed de estabilidad me hace arder violentamente si me ofreces de beber agua." },
+            { nombre: "Magnesio (Mg)", grupo: 2, periodo: 3, pista: "Al arder emito una luz blanca tan intensa que ciega, y soy el corazón verde de la molécula que da vida a las plantas." },
+            { nombre: "Aluminio (Al)", grupo: 13, periodo: 3, pista: "Alguna vez fui más valioso que el oro; hoy formo el esqueleto de las aves de acero que cruzan el cielo y envuelvo tus sobras de comida." },
+            { nombre: "Silicio (Si)", grupo: 14, periodo: 3, pista: "Soy la base de la arena de las playas y el fundamento absoluto de la era digital; sin mí, tu dispositivo no tendría 'cerebro'." },
+            { nombre: "Fósforo (P)", grupo: 15, periodo: 3, pista: "Fui descubierto hirviendo orina; mi versión blanca brilla en la oscuridad y es letal, mientras la roja se desgasta para encender tus cerillas." },
+            { nombre: "Azufre (S)", grupo: 16, periodo: 3, pista: "De color amarillo infernal, mi olor se asocia clásicamente con los volcanes y demonios, pero irónicamente entrelazo las proteínas para dar forma a tu cabello." },
+            { nombre: "Cloro (Cl)", grupo: 17, periodo: 3, pista: "Estoy a un solo paso de la perfección; en mi forma pura puedo ser un gas asfixiante, pero aliarme con tu peor enemigo me convierte en el sazón de tu mesa." },
+            { nombre: "Argón (Ar)", grupo: 18, periodo: 3, pista: "Soy el 'perezoso' del aire, un gas noble que protege los filamentos de las bombillas para que no se carbonicen." },
+            { nombre: "Potasio (K)", grupo: 1, periodo: 4, pista: "Ardo con llama lila al tocar el agua, y aunque soy explosivo en estado puro, los latidos de tu corazón se detendrían sin mis iones." },
+            { nombre: "Calcio (Ca)", grupo: 2, periodo: 4, pista: "Sostengo la arquitectura de tu propio esqueleto desde las sombras, formando las rocas calcáreas y las conchas de los mares." }
+        ];
+
+        let elemsOcultos = [], hallados = 0, tiros = 0, malas = 0;
+
+        function iniciarJuego() {
+            let baraja = [...baseElementos].sort(() => 0.5 - Math.random());
+            elemsOcultos = baraja.slice(0, 5).map(el => ({ ...el, descubierto: false }));
+            hallados = 0; tiros = 0; malas = 0;
+            actualizarHUD();
+            
+            for(let i=0; i<5; i++) {
+                let card = document.getElementById(`card-${i}`);
+                card.className = "element-card";
+                card.innerHTML = `<strong style="color:var(--accent);">Objetivo ${i+1}</strong><br><span style="font-size:0.8rem; font-style:italic;">"${elemsOcultos[i].pista}"</span>`;
+            }
+        }
+
+        function actualizarHUD() {
+            document.getElementById('contador').innerText = hallados;
+            document.getElementById('intentos').innerText = tiros;
+            document.getElementById('fallos').innerText = malas;
+        }
+
+        window.disparar = async () => {
+            if (hallados === 5) return;
+            const g = parseInt(document.getElementById('inputGrupo').value);
+            const p = parseInt(document.getElementById('inputPeriodo').value);
+            const res = document.getElementById('resultadoJuego');
+            res.style.display = "block";
+
+            if (!g || !p || g < 1 || g > 18 || p < 1 || p > 7) {
+                res.className = "resultado miss"; res.innerHTML = "Ingresa Grupo (1-18) y Periodo (1-7)."; return;
+            }
+
+            tiros++;
+            let hitIndex = elemsOcultos.findIndex(el => el.grupo === g && el.periodo === p);
+
+            if (hitIndex !== -1) {
+                let obj = elemsOcultos[hitIndex];
+                if (obj.descubierto) {
+                    malas++; res.className = "resultado miss"; res.innerHTML = `Ya hallaste el ${obj.nombre}. Suma fallo.`;
+                } else {
+                    obj.descubierto = true; hallados++;
+                    let card = document.getElementById(`card-${hitIndex}`);
+                    card.classList.add("found");
+                    card.innerHTML = `<strong style="color:var(--correct); font-size:1.1rem;">${obj.nombre}</strong><br>G:${g} P:${p}`;
+                    res.className = "resultado hit"; res.innerHTML = `¡IMPACTO DIRECTO! <strong>${obj.nombre}</strong> destruido.`;
+                }
+            } else {
+                malas++; res.className = "resultado miss"; res.innerHTML = `Agua. (G${g}, P${p}) está vacío.`;
+            }
+
+            actualizarHUD();
+
+            // Fin del Juego
+            if (hallados === 5) {
+                document.getElementById('btn-disparar').disabled = true;
+                document.getElementById('btn-disparar').innerText = "Guardando...";
+                res.className = "resultado"; res.innerHTML = "Batalla terminada. Guardando récord en la base de datos...";
+                
+                try {
+                    await setDoc(doc(db, "batalla_enlace", currentStudent.zip), {
+                        nombre: currentStudent.nombre,
+                        zipgrade: currentStudent.zip,
+                        tiros: tiros,
+                        fallos: malas,
+                        fecha: new Date().toLocaleString("es-CO")
+                    });
+                    res.className = "resultado hit";
+                    res.innerHTML = `¡Misión Cumplida!<br>Puntaje guardado. Fallos totales: <strong>${malas}</strong>`;
+                    document.getElementById('btn-disparar').style.display = "none";
+                } catch(e) {
+                    res.className = "resultado miss"; res.innerHTML = "Error al guardar tu récord. Avisa al profesor.";
+                }
+            }
+        };
+
+        // ==========================================
+        //  PANEL DE ADMINISTRADOR
+        // ==========================================
+        window.loginAdmin = async () => {
+            const pass = document.getElementById('admin-pass').value;
+            const err = document.getElementById('error-admin');
+            
+            // Reemplaza "admin123" por la contraseña que usaste en tu otro entorno
+            if(pass !== "Quimica2026") {
+                err.innerText = "Contraseña incorrecta."; return;
+            }
+
+            err.innerText = "Cargando registros...";
+            try {
+                // Descargar Exámenes
+                const qEval = await getDocs(collection(db, "evaluaciones_enlace"));
+                let dictEval = {};
+                qEval.forEach(doc => { dictEval[doc.id] = doc.data(); });
+
+                // Descargar Batallas
+                const qBat = await getDocs(collection(db, "batalla_enlace"));
+                let dictBat = {};
+                qBat.forEach(doc => { dictBat[doc.id] = doc.data(); });
+
+                // Unificar datos
+                datosAdmin = [];
+                Object.keys(baseEstudiantes).forEach(zip => {
+                    let nom = baseEstudiantes[zip];
+                    let pEval = dictEval[zip] ? dictEval[zip].puntaje : "N/P";
+                    let fBat = dictBat[zip] ? dictBat[zip].fallos : "N/P";
+                    let fecha = dictEval[zip] ? dictEval[zip].fecha : (dictBat[zip] ? dictBat[zip].fecha : "-");
+                    
+                    if(pEval !== "N/P" || fBat !== "N/P") {
+                        datosAdmin.push({ zip: zip, nombre: nom, examen: pEval, batalla: fBat, fecha: fecha });
+                    }
+                });
+
+                pintarTablaAdmin();
+
+                document.getElementById('login-admin').style.display = "none";
+                document.getElementById('content-admin').style.display = "block";
+
+            } catch (e) {
+                err.innerText = "Error cargando datos de Firebase.";
+                console.error(e);
+            }
+        };
+
+        function pintarTablaAdmin() {
+            const tbody = document.getElementById('tbody-admin');
+            tbody.innerHTML = "";
+            if(datosAdmin.length === 0) { tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Ningún estudiante ha presentado pruebas aún.</td></tr>"; return; }
+            
+            datosAdmin.sort((a,b) => a.nombre.localeCompare(b.nombre)).forEach(d => {
+                tbody.innerHTML += `<tr>
+                    <td>${d.zip}</td><td>${d.nombre}</td>
+                    <td style="color:${d.examen==='N/P'?'#a9b1d6':(d.examen>=3?'var(--correct)':'var(--error)')}; font-weight:bold;">${d.examen}</td>
+                    <td style="color:${d.batalla==='N/P'?'#a9b1d6':(d.batalla<=5?'var(--correct)':'var(--error)')}; font-weight:bold;">${d.batalla}</td>
+                    <td>${d.fecha}</td>
+                </tr>`;
+            });
+        }
+
+        window.descargarExcel = () => {
+            if(datosAdmin.length === 0) return;
+            const ws = XLSX.utils.json_to_sheet(datosAdmin);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Notas_Enlacequest");
+            XLSX.writeFile(wb, "Reporte_QuimicaQuest_SJ.xlsx");
+        };
+
+    </script>
+</body>
+</html>
