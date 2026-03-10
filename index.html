@@ -11,7 +11,7 @@
         :root {
             --bg-color: #1a1b26; --panel-bg: rgba(36, 40, 59, 0.7); --text-color: #c0caf5;
             --accent: #7aa2f7; --secondary: #e0af68; --correct: #73daca; --error: #f7768e;
-            --btn-bg: #414868; --highlight: rgba(122, 162, 247, 0.15);
+            --btn-bg: #414868; --highlight: rgba(122, 162, 247, 0.15); --warning: #ff9e64;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -97,6 +97,7 @@
         .admin-table { width: 100%; min-width: 600px; }
         .admin-table th { background: var(--accent); color: #1a1b26; }
         .admin-table td { background: #14151f; }
+        .import-box { margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.3); border: 2px dashed var(--warning); border-radius: 8px; text-align: left; }
 
         @media (max-width: 768px) {
             h1 { font-size: 1.5rem; }
@@ -152,84 +153,28 @@
             <h3>2. Grupos o Familias Químicas</h3>
             <p>Los elementos de una misma columna (Grupo) comparten el mismo número de electrones de valencia, por lo que tienen un comportamiento químico similar, formando "familias":</p>
             <table>
-                <tr>
-                    <th>Grupo</th>
-                    <th>Nombre de la Familia</th>
-                    <th>Características Clave</th>
-                </tr>
-                <tr>
-                    <td>Grupo 1 (IA)</td>
-                    <td><strong>Metales Alcalinos</strong></td>
-                    <td>Muy reactivos (reaccionan violentamente con agua). 1 electrón de valencia. (Ej: Li, Na, K). *El Hidrógeno está aquí pero es no metal.</td>
-                </tr>
-                <tr>
-                    <td>Grupo 2 (IIA)</td>
-                    <td><strong>Metales Alcalinotérreos</strong></td>
-                    <td>Reactivos, más duros que los alcalinos. 2 electrones de valencia. (Ej: Be, Mg, Ca).</td>
-                </tr>
-                <tr>
-                    <td>Grupos 3-12 (B)</td>
-                    <td><strong>Metales de Transición</strong></td>
-                    <td>Metales duros, altos puntos de fusión, buenos conductores. (Ej: Fe, Cu, Au).</td>
-                </tr>
-                <tr>
-                    <td>Grupo 13 (IIIA)</td>
-                    <td><strong>Térreos o Boroideos</strong></td>
-                    <td>3 electrones de valencia. (Ej: Boro, Aluminio).</td>
-                </tr>
-                <tr>
-                    <td>Grupo 14 (IVA)</td>
-                    <td><strong>Carbonoideos</strong></td>
-                    <td>4 electrones de valencia. Vitales para la vida y la tecnología. (Ej: Carbono, Silicio).</td>
-                </tr>
-                <tr>
-                    <td>Grupo 15 (VA)</td>
-                    <td><strong>Nitrogenoideos</strong></td>
-                    <td>5 electrones de valencia. (Ej: Nitrógeno, Fósforo).</td>
-                </tr>
-                <tr>
-                    <td>Grupo 16 (VIA)</td>
-                    <td><strong>Anfígenos o Calcógenos</strong></td>
-                    <td>6 electrones de valencia. Formadores de minerales y óxidos. (Ej: Oxígeno, Azufre).</td>
-                </tr>
-                <tr>
-                    <td>Grupo 17 (VIIA)</td>
-                    <td><strong>Halógenos</strong></td>
-                    <td>No metales extremadamente reactivos. 7 electrones de valencia. (Ej: Flúor, Cloro).</td>
-                </tr>
-                <tr>
-                    <td>Grupo 18 (VIIIA)</td>
-                    <td><strong>Gases Nobles</strong></td>
-                    <td>Inertes o muy poco reactivos debido a su capa de valencia completa. (Ej: Helio, Neón).</td>
-                </tr>
+                <tr><th>Grupo</th><th>Nombre de la Familia</th><th>Características Clave</th></tr>
+                <tr><td>1 (IA)</td><td><strong>Metales Alcalinos</strong></td><td>Muy reactivos (reaccionan violentamente con agua). 1 electrón de valencia. (Ej: Li, Na, K). *El Hidrógeno está aquí pero es no metal.</td></tr>
+                <tr><td>2 (IIA)</td><td><strong>Metales Alcalinotérreos</strong></td><td>Reactivos, más duros que los alcalinos. 2 electrones de valencia. (Ej: Be, Mg, Ca).</td></tr>
+                <tr><td>Grupos 3-12 (B)</td><td><strong>Metales de Transición</strong></td><td>Metales duros, altos puntos de fusión, buenos conductores. (Ej: Fe, Cu, Au).</td></tr>
+                <tr><td>13 (IIIA)</td><td><strong>Térreos o Boroideos</strong></td><td>3 electrones de valencia. (Ej: Boro, Aluminio).</td></tr>
+                <tr><td>14 (IVA)</td><td><strong>Carbonoideos</strong></td><td>4 electrones de valencia. Vitales para la vida y la tecnología. (Ej: Carbono, Silicio).</td></tr>
+                <tr><td>15 (VA)</td><td><strong>Nitrogenoideos</strong></td><td>5 electrones de valencia. (Ej: Nitrógeno, Fósforo).</td></tr>
+                <tr><td>16 (VIA)</td><td><strong>Anfígenos o Calcógenos</strong></td><td>6 electrones de valencia. Formadores de minerales y óxidos. (Ej: Oxígeno, Azufre).</td></tr>
+                <tr><td>17 (VIIA)</td><td><strong>Halógenos</strong></td><td>No metales extremadamente reactivos. 7 electrones de valencia. (Ej: Flúor, Cloro).</td></tr>
+                <tr><td>18 (VIIIA)</td><td><strong>Gases Nobles</strong></td><td>Inertes o muy poco reactivos debido a su capa de valencia completa. (Ej: Helio, Neón).</td></tr>
             </table>
         </section>
 
         <section id="propiedades" class="section">
             <h2>Propiedades Periódicas</h2>
             <p>El comportamiento químico de los átomos está dictado por tendencias observables según su posición en los grupos y periodos:</p>
-            
             <table>
-                <tr>
-                    <th>Propiedad</th>
-                    <th>Definición y Tendencia</th>
-                </tr>
-                <tr>
-                    <td><strong>Radio Atómico / Volumen Atómico</strong></td>
-                    <td>Determina el tamaño del átomo. Aumenta al bajar en un grupo (más niveles de energía) y disminuye al avanzar de izquierda a derecha en un periodo.</td>
-                </tr>
-                <tr>
-                    <td><strong>Electronegatividad</strong></td>
-                    <td>Capacidad de un átomo para atraer electrones en un enlace químico. Aumenta hacia arriba y hacia la derecha (El Flúor es el más electronegativo).</td>
-                </tr>
-                <tr>
-                    <td><strong>Energía (Potencial) de Ionización</strong></td>
-                    <td>Energía requerida para arrancar un electrón de un átomo neutro. Los metales tienen baja energía de ionización, los no metales alta.</td>
-                </tr>
-                <tr>
-                    <td><strong>Afinidad Electrónica</strong></td>
-                    <td>Energía liberada cuando un átomo neutro acepta un electrón. Los halógenos tienen la mayor afinidad.</td>
-                </tr>
+                <tr><th>Propiedad</th><th>Definición y Tendencia</th></tr>
+                <tr><td><strong>Radio Atómico / Volumen Atómico</strong></td><td>Determina el tamaño del átomo. Aumenta al bajar en un grupo (más niveles de energía) y disminuye al avanzar de izquierda a derecha en un periodo.</td></tr>
+                <tr><td><strong>Electronegatividad</strong></td><td>Capacidad de un átomo para atraer electrones en un enlace químico. Aumenta hacia arriba y hacia la derecha (El Flúor es el más electronegativo).</td></tr>
+                <tr><td><strong>Energía de Ionización</strong></td><td>Energía requerida para arrancar un electrón de un átomo neutro. Los metales tienen baja energía de ionización, los no metales alta.</td></tr>
+                <tr><td><strong>Afinidad Electrónica</strong></td><td>Energía liberada cuando un átomo neutro acepta un electrón. Los halógenos tienen la mayor afinidad.</td></tr>
             </table>
         </section>
 
@@ -242,52 +187,29 @@
             <h3>Búsqueda de la Estabilidad</h3>
             <p>Para lograr la estabilidad energética (similar a la de los gases nobles), los átomos donan, aceptan o comparten electrones guiados por dos principios fundamentales:</p>
             <ul>
-                <li><strong>La Regla del Octeto:</strong> La mayoría de los átomos buscan completar <strong>8 electrones</strong> en su último nivel de energía (capa de valencia) para ser estables. Por ejemplo, el Cloro (7 electrones) busca ganar 1 electrón.</li>
+                <li><strong>La Regla del Octeto:</strong> La mayoría de los átomos buscan completar <strong>8 electrones</strong> en su último nivel de energía (capa de valencia) para ser estables.</li>
                 <li><strong>La Ley del Dueto:</strong> Elementos pequeños como el <strong>Hidrógeno (H)</strong>, el Litio (Li) o el Berilio (Be) no pueden albergar 8 electrones. Estos alcanzan su estabilidad completando solo <strong>2 electrones</strong> en su único o último nivel, adquiriendo la configuración estable del gas noble Helio (He).</li>
             </ul>
 
             <h3>Fórmulas Químicas</h3>
-            <p>Cuando los átomos se enlazan respetando las reglas del octeto y del dueto, forman sustancias compuestas. Las <strong>fórmulas químicas</strong> son la representación alfanumérica de estos compuestos, indicando qué elementos los forman y en qué proporción geométrica se encuentran.</p>
+            <p>Las <strong>fórmulas químicas</strong> son la representación alfanumérica de estos compuestos, indicando qué elementos los forman y en qué proporción geométrica se encuentran.</p>
             
             <div class="highlight-box">
                 <strong>Tipos de Fórmulas Químicas:</strong>
                 <ul>
-                    <li><strong>Fórmula Empírica:</strong> Indica la proporción más simple en números enteros de los átomos presentes en un compuesto. Es la mínima expresión.<br>
-                    <em>Ejemplo:</em> El peróxido de hidrógeno (agua oxigenada) tiene igual número de hidrógenos y oxígenos (proporción 1:1), por lo que su fórmula empírica es <strong>HO</strong>.</li>
-                    <li><strong>Fórmula Molecular:</strong> Indica la cantidad exacta y real de átomos de cada elemento que forman una sola molécula del compuesto.<br>
-                    <em>Ejemplo:</em> La fórmula molecular del peróxido de hidrógeno es <strong>H<sub>2</sub>O<sub>2</sub></strong> (contiene exactamente 2 átomos de H y 2 de O). Para el agua, es <strong>H<sub>2</sub>O</strong>.</li>
-                    <li><strong>Fórmula Estructural:</strong> Muestra de forma gráfica cómo están conectados los átomos entre sí, utilizando líneas para representar los enlaces simples, dobles o triples.<br>
-                    <em>Ejemplo:</em> Para el agua es <strong>H — O — H</strong>, y para el dióxido de carbono es <strong>O = C = O</strong>.</li>
-                    <li><strong>Estructura de Lewis:</strong> Representa los electrones de valencia usando puntos o cruces alrededor del símbolo. Muestra tanto los electrones que se comparten como los pares libres que no forman enlace.<br>
-                    <em>Ejemplo:</em> Para el agua se representa como <strong>H : O : H</strong> (recordando añadir visualmente dos pares de electrones libres o no enlazantes encima y debajo del símbolo del oxígeno).</li>
+                    <li><strong>Fórmula Empírica:</strong> Indica la proporción más simple en números enteros. (Ej: HO para el peróxido).</li>
+                    <li><strong>Fórmula Molecular:</strong> Indica la cantidad exacta y real de átomos en una molécula. (Ej: H<sub>2</sub>O<sub>2</sub>).</li>
+                    <li><strong>Fórmula Estructural:</strong> Muestra de forma gráfica cómo están conectados los átomos. (Ej: H — O — H).</li>
+                    <li><strong>Estructura de Lewis:</strong> Representa los electrones de valencia usando puntos o cruces alrededor del símbolo.</li>
                 </ul>
             </div>
-            
-            <table>
-                <tr>
-                    <th>Fórmula Molecular</th>
-                    <th>Análisis de la Estructura</th>
-                </tr>
-                <tr>
-                    <td><strong>H<sub>2</sub>O</strong> (Agua)</td>
-                    <td>Contiene 2 átomos de Hidrógeno y 1 de Oxígeno. El Oxígeno cumple la regla del <strong>octeto</strong> compartiendo electrones con los hidrógenos, y cada Hidrógeno cumple la ley del <strong>dueto</strong>.</td>
-                </tr>
-                <tr>
-                    <td><strong>NaCl</strong> (Sal de mesa)</td>
-                    <td>1 átomo de Sodio (Na) y 1 de Cloro (Cl). El Sodio cede su único electrón de valencia al Cloro. El Cloro completa su <strong>octeto</strong>, y el Sodio se queda con su capa interior completa (también 8 electrones).</td>
-                </tr>
-                <tr>
-                    <td><strong>CO<sub>2</sub></strong> (Dióxido de carbono)</td>
-                    <td>1 átomo de Carbono (Grupo 14) forma enlaces dobles con 2 átomos de Oxígeno (Grupo 16), logrando que los tres elementos completen su <strong>octeto</strong>.</td>
-                </tr>
-            </table>
         </section>
 
         <section id="evaluacion" class="section">
             <h2>Evaluación de Conocimientos</h2>
             <div class="game-container" id="login-eval">
                 <p style="color:var(--secondary)">Ingresa tu Código ZipGrade para iniciar la prueba. <br><small>(Solo tienes un intento)</small></p>
-                <input type="text" id="zip-eval" placeholder="Ej: 12345">
+                <input type="number" id="zip-eval" placeholder="Ej: 101012026">
                 <button class="action-btn" onclick="validarIngreso('evaluacion')" id="btn-login-eval">Verificar e Iniciar</button>
                 <div id="error-eval" style="color:var(--error); margin-top:10px; font-weight:bold;"></div>
             </div>
@@ -306,7 +228,7 @@
             <h2>Batalla Elemental</h2>
             <div class="game-container" id="login-juego">
                 <p style="color:var(--secondary)">Ingresa tu Código ZipGrade para registrar tu puntaje.</p>
-                <input type="text" id="zip-juego" placeholder="Ej: 12345">
+                <input type="number" id="zip-juego" placeholder="Ej: 101012026">
                 <button class="action-btn" onclick="validarIngreso('juego')" id="btn-login-juego">Verificar e Iniciar</button>
                 <div id="error-juego" style="color:var(--error); margin-top:10px; font-weight:bold;"></div>
             </div>
@@ -359,6 +281,14 @@
                         <tbody id="tbody-admin"><tr><td colspan="5" style="text-align:center;">Cargando datos...</td></tr></tbody>
                     </table>
                 </div>
+
+                <div class="import-box">
+                    <h4 style="margin-top:0; color:var(--warning);"><i class="fas fa-database"></i> Herramienta de Importación Segura</h4>
+                    <p style="font-size: 0.9rem;">Para evitar exponer los datos en GitHub, sube tu archivo <strong>students-6.xlsx</strong> desde tu computadora. Esto guardará los nombres en Firebase de forma privada y permitirá que los estudiantes inicien sesión al instante.</p>
+                    <input type="file" id="file-upload" accept=".xlsx, .xls" style="font-size: 0.9rem; margin:0 0 10px 0;">
+                    <button class="action-btn" style="width: auto; padding: 8px 15px; font-size: 1rem; background: var(--warning); color:#1a1b26;" onclick="importarEstudiantes()">Subir a Firebase</button>
+                    <div id="import-status" style="margin-top: 10px; font-weight: bold;"></div>
+                </div>
             </div>
         </section>
 
@@ -381,7 +311,6 @@
         const db = getFirestore(app);
 
         // --- ESTADO GLOBAL ---
-        let baseEstudiantes = {}; // Diccionario: { "12345": "Juan Perez" }
         let currentStudent = { zip: null, nombre: null };
         let datosAdmin = [];
 
@@ -389,39 +318,11 @@
         window.showSection = (id, btn) => {
             document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            
             document.querySelectorAll('#nav-menu button').forEach(b => b.classList.remove('active-nav'));
             if(btn) btn.classList.add('active-nav');
         };
 
-        // --- LECTURA EXCEL GITHUB ---
-        const excelUrl = "https://raw.githubusercontent.com/Eddedd-edu/TABLAPER/main/students-6.xlsx";
-        
-        async function cargarExcel() {
-            try {
-                const response = await fetch(excelUrl);
-                const arrayBuffer = await response.arrayBuffer();
-                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-                const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                
-                // Asumiendo que la columna A (index 0) es Nombre y B (index 1) es ZipGrade, o viceversa.
-                // Ajusta los índices si tu Excel es diferente. Buscamos números.
-                data.forEach(row => {
-                    let nom = row[0]; let zip = row[1];
-                    if(typeof nom === 'number') { zip = nom; nom = row[1]; }
-                    if(zip && nom && !isNaN(zip)) { baseEstudiantes[zip.toString().trim()] = nom.trim(); }
-                });
-                console.log("Base de estudiantes cargada:", Object.keys(baseEstudiantes).length);
-            } catch (error) {
-                console.error("Error cargando Excel de GitHub. Verifica la URL o los permisos.", error);
-            }
-        }
-        
-        cargarExcel(); // Se ejecuta al abrir la página
-
-        // --- VALIDACIÓN DE ACCESO (EVAL & JUEGO) ---
+        // --- NUEVA VALIDACIÓN DIRECTO CON FIREBASE ---
         window.validarIngreso = async (modulo) => {
             const inputId = modulo === 'evaluacion' ? 'zip-eval' : 'zip-juego';
             const errorId = modulo === 'evaluacion' ? 'error-eval' : 'error-juego';
@@ -433,16 +334,21 @@
 
             errorDiv.innerText = "";
             if(!zip) { errorDiv.innerText = "Ingresa un código."; return; }
-            if(Object.keys(baseEstudiantes).length === 0) { errorDiv.innerText = "La base de datos aún está cargando. Intenta en 3 segundos."; return; }
-
-            const nombre = baseEstudiantes[zip];
-            if(!nombre) { errorDiv.innerText = "Código no encontrado en el sistema."; return; }
 
             btn.disabled = true;
-            btn.innerText = "Verificando...";
+            btn.innerText = "Buscando en la base de datos...";
 
             try {
-                // Verificar si ya presentó
+                // 1. Verificar si el estudiante existe en la colección segura "estudiantes"
+                const docEstudiante = await getDoc(doc(db, "estudiantes", zip));
+                if (!docEstudiante.exists()) {
+                    errorDiv.innerText = "Código ZipGrade no encontrado. Pídele al profesor que importe la lista.";
+                    btn.disabled = false; btn.innerText = "Verificar e Iniciar";
+                    return;
+                }
+                const nombre = docEstudiante.data().nombre;
+
+                // 2. Verificar si ya presentó la prueba
                 const docRef = doc(db, modulo === 'evaluacion' ? "evaluaciones_enlace" : "batalla_enlace", zip);
                 const docSnap = await getDoc(docRef);
 
@@ -462,7 +368,8 @@
                 if(modulo === 'juego') iniciarJuego();
 
             } catch (e) {
-                errorDiv.innerText = "Error de conexión con el servidor.";
+                errorDiv.innerText = "Error de conexión con el servidor de Firebase.";
+                console.error(e);
                 btn.disabled = false; btn.innerText = "Verificar e Iniciar";
             }
         };
@@ -490,7 +397,7 @@
             { pregunta: "En el H2O, ¿qué regla(s) de estabilidad se cumplen?", opciones: ["Solo octeto", "Solo dueto", "El oxígeno cumple el octeto y el hidrógeno el dueto", "Ninguna"], correcta: 2 },
             { pregunta: "¿Qué postulado estableció Robert Boyle en 1660?", opciones: ["La materia está hecha de 4 elementos", "Los elementos están formados por cuerpos simples", "Los electrones giran en órbitas", "El átomo tiene un núcleo positivo"], correcta: 1 },
             { pregunta: "¿Qué elementos comparten características intermedias entre metales y no metales?", opciones: ["Gases Nobles", "Lantánidos", "Metaloides", "Actínidos"], correcta: 2 },
-            { pregunta: "¿Qué nos indica que varios elementos pertenezcan a la misma familia o grupo?", opciones: ["Tienen el mismo número atómico", "Tienen el mismo número de electrones de valencia y comportamiento", "Tienen la misma masa atómica", "Están en el mismo periodo"], correcta: 1 }
+            { pregunta: "¿Qué nos indica que varios elementos pertenezcan a la misma familia o grupo?", opciones: ["Tienen el mismo número atómico", "Tienen el mismo número de electrones de valencia", "Tienen la misma masa atómica", "Están en el mismo periodo"], correcta: 1 }
         ];
 
         let pregsElegidas = [];
@@ -531,7 +438,6 @@
                 return;
             }
 
-            // Bloquear botón y guardar en Firebase
             document.getElementById('btn-enviar-eval').disabled = true;
             document.getElementById('btn-enviar-eval').innerText = "Guardando...";
             resDiv.className = "resultado"; resDiv.innerHTML = "Registrando nota en el servidor...";
@@ -548,7 +454,6 @@
                 resDiv.innerHTML = `Examen Guardado.<br>Tu puntaje final es: <strong>${puntaje} / 5</strong>`;
                 document.getElementById('contenedor-preguntas').style.display = "none";
                 document.getElementById('btn-enviar-eval').style.display = "none";
-
             } catch(e) {
                 resDiv.className = "resultado miss";
                 resDiv.innerHTML = "Error al guardar. Informa a tu profesor.";
@@ -635,7 +540,6 @@
 
             actualizarHUD();
 
-            // Fin del Juego
             if (hallados === 5) {
                 document.getElementById('btn-disparar').disabled = true;
                 document.getElementById('btn-disparar').innerText = "Guardando...";
@@ -659,44 +563,42 @@
         };
 
         // ==========================================
-        //  PANEL DE ADMINISTRADOR
+        //  PANEL DE ADMINISTRADOR E IMPORTACIÓN
         // ==========================================
         window.loginAdmin = async () => {
             const pass = document.getElementById('admin-pass').value;
             const err = document.getElementById('error-admin');
             
-            // Reemplaza "admin123" por la contraseña que usaste en tu otro entorno
             if(pass !== "Quimica2026") {
                 err.innerText = "Contraseña incorrecta."; return;
             }
 
             err.innerText = "Cargando registros...";
             try {
-                // Descargar Exámenes
+                // 1. Cargar la lista completa de estudiantes importados
+                const qEstud = await getDocs(collection(db, "estudiantes"));
+                let baseLocal = {};
+                qEstud.forEach(doc => { baseLocal[doc.id] = doc.data().nombre; });
+
+                // 2. Descargar Exámenes y Batallas
                 const qEval = await getDocs(collection(db, "evaluaciones_enlace"));
-                let dictEval = {};
-                qEval.forEach(doc => { dictEval[doc.id] = doc.data(); });
+                let dictEval = {}; qEval.forEach(doc => { dictEval[doc.id] = doc.data(); });
 
-                // Descargar Batallas
                 const qBat = await getDocs(collection(db, "batalla_enlace"));
-                let dictBat = {};
-                qBat.forEach(doc => { dictBat[doc.id] = doc.data(); });
+                let dictBat = {}; qBat.forEach(doc => { dictBat[doc.id] = doc.data(); });
 
-                // Unificar datos
+                // 3. Unificar datos para la tabla
                 datosAdmin = [];
-                Object.keys(baseEstudiantes).forEach(zip => {
-                    let nom = baseEstudiantes[zip];
+                Object.keys(baseLocal).forEach(zip => {
+                    let nom = baseLocal[zip];
                     let pEval = dictEval[zip] ? dictEval[zip].puntaje : "N/P";
                     let fBat = dictBat[zip] ? dictBat[zip].fallos : "N/P";
                     let fecha = dictEval[zip] ? dictEval[zip].fecha : (dictBat[zip] ? dictBat[zip].fecha : "-");
                     
-                    if(pEval !== "N/P" || fBat !== "N/P") {
-                        datosAdmin.push({ zip: zip, nombre: nom, examen: pEval, batalla: fBat, fecha: fecha });
-                    }
+                    datosAdmin.push({ zip: zip, nombre: nom, examen: pEval, batalla: fBat, fecha: fecha });
                 });
 
                 pintarTablaAdmin();
-
                 document.getElementById('login-admin').style.display = "none";
                 document.getElementById('content-admin').style.display = "block";
 
@@ -709,7 +611,7 @@
         function pintarTablaAdmin() {
             const tbody = document.getElementById('tbody-admin');
             tbody.innerHTML = "";
-            if(datosAdmin.length === 0) { tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>Ningún estudiante ha presentado pruebas aún.</td></tr>"; return; }
+            if(datosAdmin.length === 0) { tbody.innerHTML = "<tr><td colspan='5' style='text-align:center;'>No hay estudiantes en la base de datos. ¡Importa tu Excel!</td></tr>"; return; }
             
             datosAdmin.sort((a,b) => a.nombre.localeCompare(b.nombre)).forEach(d => {
                 tbody.innerHTML += `<tr>
@@ -727,6 +629,55 @@
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Notas_Enlacequest");
             XLSX.writeFile(wb, "Reporte_QuimicaQuest_SJ.xlsx");
+        };
+
+        // --- FUNCIÓN PARA IMPORTAR EXCEL A FIREBASE ---
+        window.importarEstudiantes = async () => {
+            const fileInput = document.getElementById('file-upload');
+            const status = document.getElementById('import-status');
+            if(!fileInput.files.length) { status.style.color="var(--error)"; status.innerText="Selecciona un archivo primero."; return; }
+            
+            status.style.color="var(--accent)";
+            status.innerText="Leyendo archivo...";
+            
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = async (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
+                    
+                    let count = 0;
+                    status.innerText="Subiendo a Firebase... Por favor espera.";
+                    
+                    for(let row of json) {
+                        let nom = row[0]; let zip = row[1];
+                        if(typeof nom === 'number') { zip = nom; nom = row[1]; }
+                        
+                        if(zip && nom && !isNaN(zip)) {
+                            // Sube cada estudiante a la colección 'estudiantes'
+                            await setDoc(doc(db, "estudiantes", zip.toString().trim()), {
+                                nombre: nom.trim()
+                            });
+                            count++;
+                        }
+                    }
+                    status.style.color="var(--correct)";
+                    status.innerText=`¡Éxito! Se importaron ${count} estudiantes a la base de datos segura.`;
+                    
+                    // Recargar la tabla para mostrar los nuevos estudiantes
+                    setTimeout(() => window.loginAdmin(), 2000);
+
+                } catch(err) {
+                    console.error(err);
+                    status.style.color="var(--error)";
+                    status.innerText="Error al procesar el archivo. Asegúrate de que sea un .xlsx válido.";
+                }
+            };
+            reader.readAsArrayBuffer(file);
         };
 
     </script>
