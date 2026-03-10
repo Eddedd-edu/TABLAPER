@@ -631,14 +631,14 @@
             XLSX.writeFile(wb, "Reporte_QuimicaQuest_SJ.xlsx");
         };
 
-        // --- FUNCIÓN PARA IMPORTAR EXCEL A FIREBASE ---
+        // --- FUNCIÓN INTELIGENTE PARA IMPORTAR EXCEL ---
         window.importarEstudiantes = async () => {
             const fileInput = document.getElementById('file-upload');
             const status = document.getElementById('import-status');
             if(!fileInput.files.length) { status.style.color="var(--error)"; status.innerText="Selecciona un archivo primero."; return; }
             
             status.style.color="var(--accent)";
-            status.innerText="Leyendo archivo...";
+            status.innerText="Leyendo archivo de forma inteligente...";
             
             const file = fileInput.files[0];
             const reader = new FileReader();
@@ -648,23 +648,47 @@
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, {type: 'array'});
                     const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    // Leemos toda la hoja como una matriz plana de filas y columnas
                     const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
                     
                     let count = 0;
                     status.innerText="Subiendo a Firebase... Por favor espera.";
                     
                     for(let row of json) {
-                        let nom = row[0]; let zip = row[1];
-                        if(typeof nom === 'number') { zip = nom; nom = row[1]; }
-                        
-                        if(zip && nom && !isNaN(zip)) {
-                            // Sube cada estudiante a la colección 'estudiantes'
-                            await setDoc(doc(db, "estudiantes", zip.toString().trim()), {
-                                nombre: nom.trim()
+                        if (!row || row.length === 0) continue; // Salta filas vacías
+
+                        let zipDetectado = null;
+                        let partesNombre = [];
+
+                        // Escanea cada celda de la fila buscando el ZipGrade y el Nombre
+                        for(let cell of row) {
+                            if (cell === undefined || cell === null || cell === "") continue;
+                            
+                            let strCell = cell.toString().trim();
+                            
+                            // Si es un número de al menos 4 dígitos, lo toma como ZipGrade
+                            if (!isNaN(strCell) && strCell.length >= 4) {
+                                zipDetectado = strCell;
+                            } 
+                            // Si es texto (y no es un encabezado), lo junta para armar el nombre
+                            else if (isNaN(strCell) && strCell.length > 2) {
+                                let lower = strCell.toLowerCase();
+                                if(!lower.includes("zipgrade") && !lower.includes("nombre") && !lower.includes("apellido")) {
+                                    partesNombre.push(strCell);
+                                }
+                            }
+                        }
+
+                        // Si en esa fila encontró un ZipGrade válido y un Nombre, lo guarda
+                        if (zipDetectado && partesNombre.length > 0) {
+                            let nombreCompleto = partesNombre.join(" "); // Une columnas separadas de nombre/apellido
+                            await setDoc(doc(db, "estudiantes", zipDetectado), {
+                                nombre: nombreCompleto
                             });
                             count++;
                         }
                     }
+                    
                     status.style.color="var(--correct)";
                     status.innerText=`¡Éxito! Se importaron ${count} estudiantes a la base de datos segura.`;
                     
